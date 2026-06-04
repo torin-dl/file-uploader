@@ -6,6 +6,8 @@ import { dirname } from "node:path";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
+import { PrismaClient } from "../generated/prisma/index.js";
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +20,17 @@ app.use(express.static(assetsPath));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(session({ secret: "dogs", resave: false, saveUninitialized: false }));
+app.use(
+    session({
+        secret: "dogs",
+        resave: false,
+        saveUninitialized: false,
+        store: new PrismaSessionStore(new PrismaClient(), {
+            checkPeriod: 2 * 60 * 1000,
+            dbRecordIdIsSessionId: true,
+        }),
+    }),
+);
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
