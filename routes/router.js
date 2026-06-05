@@ -21,6 +21,12 @@ const upload = multer({
     limits: { fileSize: 1024 * 1024 * 10 },
 });
 
+router.get("/", fileController.getFiles);
 router.get("/upload", fileController.uploadGet);
 router.post("/upload", upload.single("file"), fileController.uploadPost);
+router.get("/sign-up", fileController.signUpGet);
+router.post("/sign-up", fileController.signUpPost);
+router.post("/log-in", fileController.logIn);
+router.get("/log-out", fileController.logOut);
+
 export default router;

@@ -6,8 +6,9 @@ import { dirname } from "node:path";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { prisma } from "./lib/prisma.js";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
-import { PrismaClient } from "../generated/prisma/index.js";
+import { PrismaClient } from "./generated/prisma/index.js";
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,7 +26,7 @@ app.use(
         secret: "dogs",
         resave: false,
         saveUninitialized: false,
-        store: new PrismaSessionStore(new PrismaClient(), {
+        store: new PrismaSessionStore(prisma, {
             checkPeriod: 2 * 60 * 1000,
             dbRecordIdIsSessionId: true,
         }),
