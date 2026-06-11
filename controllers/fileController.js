@@ -5,8 +5,18 @@ import { prisma } from "../lib/prisma.js";
 
 const validateSignUp = [body("username").trim(), body("password").trim()];
 const validateLogIn = [body("username").trim(), body("password").trim()];
+const validateNewFolder = [body("newFolder").trim()];
+const validateEditFolder = [body("folderEdit").trim(), body("folderFile").trim(), body("nameChange").trim()];
+const validateRemoveFolder = [body("deleteFolder").trim()];
 
-function getFiles(req, res) {
+async function getFiles(req, res) {
+    const allFolders = await prisma.folder.findMany({
+        include: {
+            files: true,
+            user: true,
+        },
+    });
+    console.dir(allFolders, { depth: null });
     res.render("index", { user: req.user });
 }
 
@@ -67,4 +77,115 @@ function logOut(req, res, next) {
     });
 }
 
-export default { getFiles, uploadGet, uploadPost, signUpGet, signUpPost, logIn, logOut };
+function newFolderGet(req, res) {
+    res.render("new-folder", { user: req.user });
+}
+
+const newFolderPost = [
+    validateNewFolder,
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render("new-folder", {
+                errors: errors.array(),
+                user: req.user,
+            });
+        }
+        const { newFolder } = matchedData(req);
+
+        try {
+            await prisma.folder.upsert({
+                where: { name_userId: { name: newFolder, userId: req.user.id } },
+                update: {},
+                create: {
+                    name: newFolder,
+                    user: { connect: { id: req.user.id } },
+                },
+            });
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+        res.redirect("/");
+    },
+];
+
+function editFolderGet(req, res) {
+    res.render("edit-folder", { user: req.user });
+}
+
+const editFolderPost = [
+    validateEditFolder,
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render("edit-folder", {
+                errors: errors.array(),
+                user: req.user,
+            });
+        }
+        const { folderEdit, folderFile, nameChange } = matchedData(req);
+
+        try {
+            await prisma.folder.update({
+                where: { name_userId: { name: folderEdit, userId: req.user.id } },
+                data: {
+                    name: nameChange ? nameChange : prisma.skip,
+                    files: folderFile
+                        ? {
+                              connect: { id: parseInt(folderFile) },
+                          }
+                        : prisma.skip,
+                },
+            });
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+        res.redirect("/");
+    },
+];
+
+function removeFolderGet(req, res) {
+    res.render("remove-folder", { user: req.user });
+}
+
+const removeFolderPost = [
+    validateRemoveFolder,
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).render("remove-folder", {
+                errors: errors.array(),
+                user: req.user,
+            });
+        }
+        const { deleteFolder } = matchedData(req);
+
+        try {
+            await prisma.folder.delete({
+                where: { name_userId: { name: deleteFolder, userId: req.user.id } },
+            });
+        } catch (error) {
+            console.log(error);
+            next(error);
+        }
+        res.redirect("/");
+    },
+];
+
+export default {
+    getFiles,
+    uploadGet,
+    uploadPost,
+    signUpGet,
+    signUpPost,
+    logIn,
+    logOut,
+    newFolderGet,
+    newFolderPost,
+    editFolderGet,
+    editFolderPost,
+    removeFolderGet,
+    removeFolderPost,
+};

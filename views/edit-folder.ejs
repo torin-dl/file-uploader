@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <% if (locals.user) { %>
+        <h3>Edit folder</h3>
+        <form action="/edit-folder" method="POST">
+            <div class="form-group">
+                <label for="folderEdit">Name of folder to edit: </label>
+                <input type="text" id="folderEdit" name="folderEdit">
+            </div>
+            <div class="form-group">
+                <label for="folderFile">(optional) Add file: </label>
+                <input type="text" id="folderFile" name="folderFile">
+            </div>
+            <div class="form-group">
+                <label for="nameChange">(optional) Change name: </label>
+                <input type="text" id="nameChange" name="nameChange">
+            </div>
+            <button type="submit">Submit</button>
+    <% } %>
+</body>
+</html>

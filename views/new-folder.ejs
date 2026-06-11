@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <% if (locals.user) { %>
+        <h3>Create folder</h3>
+        <form action="/new-folder" method="POST">
+            <div class="form-group">
+                <label for="newFolder">Name: </label>
+                <input type="text" id="newFolder" name="newFolder">
+            </div>
+            <button type="submit">Submit</button>
+    <% } %>
+</body>
+</html>
