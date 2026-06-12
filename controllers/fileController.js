@@ -16,7 +16,7 @@ async function getFiles(req, res) {
             user: true,
         },
     });
-    console.dir(allFolders, { depth: null });
+
     res.render("index", { user: req.user });
 }
 
@@ -24,9 +24,19 @@ function uploadGet(req, res) {
     res.render("upload", { user: req.user });
 }
 
-async function uploadPost(req, res) {
-    // store req.file.path in db
-    // file is already stored to public/uploads via multer in router
+async function uploadPost(req, res, next) {
+    try {
+        await prisma.file.create({
+            data: {
+                path: req.file.path,
+                userId: req.user.id,
+            },
+        });
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 }
 
 async function signUpGet(req, res) {
