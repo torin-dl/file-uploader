@@ -26,10 +26,15 @@ function uploadGet(req, res) {
 
 async function uploadPost(req, res, next) {
     try {
+        const relativePath = `uploads/${req.file.filename}`;
         await prisma.file.create({
             data: {
                 path: req.file.path,
+                relativePath,
                 userId: req.user.id,
+                originalName: req.file.originalname,
+                size: req.file.size,
+                mimetype: req.file.mimetype,
             },
         });
         res.redirect("/");
@@ -184,6 +189,24 @@ const removeFolderPost = [
     },
 ];
 
+async function viewFileGet(req, res, next) {
+    const file = await prisma.file.findUnique({
+        where: {
+            id: parseInt(req.params.id),
+        },
+    });
+    if (!file) {
+        const error = new Error("file not found");
+        error.statusCode = 400;
+        return next(error);
+    }
+
+    res.render("view-file", {
+        file,
+        user: req.user,
+    });
+}
+
 export default {
     getFiles,
     uploadGet,
@@ -198,4 +221,5 @@ export default {
     editFolderPost,
     removeFolderGet,
     removeFolderPost,
+    viewFileGet,
 };

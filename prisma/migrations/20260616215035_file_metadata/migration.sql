@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "File" ADD COLUMN     "mimetype" TEXT,
+ADD COLUMN     "originalName" TEXT,
+ADD COLUMN     "size" INTEGER,
+ADD COLUMN     "uploadedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
