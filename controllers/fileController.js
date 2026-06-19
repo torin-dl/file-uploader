@@ -2,6 +2,7 @@ import { body, validationResult, matchedData } from "express-validator";
 import bcrypt from "bcrypt";
 import passport from "../config/passport.js";
 import { prisma } from "../lib/prisma.js";
+import { supabase } from "../config/supabase.js";
 
 const validateSignUp = [body("username").trim(), body("password").trim()];
 const validateLogIn = [body("username").trim(), body("password").trim()];
@@ -27,12 +28,17 @@ function uploadGet(req, res) {
 async function uploadPost(req, res, next) {
     try {
         const relativePath = `uploads/${req.file.filename}`;
+        const safeName = req.file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+        const { data, error } = await supabase.storage.from("Files").upload(`uploads/${safeName}`, req.file.buffer, {
+            contentType: req.file.mimetype,
+        });
+        const { data: urlData } = supabase.storage.from("Files").getPublicUrl(data.path);
         await prisma.file.create({
             data: {
-                path: req.file.path,
+                path: urlData.publicUrl,
                 relativePath,
                 userId: req.user.id,
-                originalName: req.file.originalname,
+                originalName: safeName,
                 size: req.file.size,
                 mimetype: req.file.mimetype,
             },

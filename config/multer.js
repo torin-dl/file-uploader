@@ -6,7 +6,7 @@ import { dirname } from "node:path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const upload = multer({
-    dest: path.join(__dirname, "../public/uploads"),
+    storage: multer.memoryStorage(),
     fileFilter: (req, file, cb) => {
         const isAllowed =
             file.mimetype.startsWith("text/") ||
